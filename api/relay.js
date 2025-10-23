@@ -6,39 +6,39 @@ export default async function handler(req, res) {
   try {
     const { username, type, time, imageUrl } = req.body;
 
-    // ✅ Your actual Discord webhook URL (hidden in Vercel env vars)
+    // ✅ Your Discord Webhook (from environment variable)
     const discordWebhook = process.env.DISCORD_WEBHOOK_URL;
 
     if (!discordWebhook) {
       return res.status(500).json({ error: 'Missing Discord webhook URL' });
     }
 
-    // Format the message for Discord
+    // ✅ Format the message to send to Discord
     const message = {
       embeds: [
         {
           title: `📋 Attendance Log`,
           color: type === "Time Out" ? 0xff0000 : 0x00ff00,
           fields: [
-            { name: "👤 Username", value: username, inline: true },
-            { name: "🕒 Type", value: type, inline: true },
-            { name: "📅 Time", value: time, inline: false }
+            { name: "👤 Username", value: username || "Unknown", inline: true },
+            { name: "🕒 Type", value: type || "N/A", inline: true },
+            { name: "📅 Time", value: time || "N/A", inline: false }
           ],
-          image: { url: imageUrl },
+          image: { url: imageUrl || null },
           timestamp: new Date().toISOString()
         }
       ]
     };
 
-    // Send to Discord
-    const discordRes = await fetch(discordWebhook, {
+    // ✅ Send to Discord
+    const discordResponse = await fetch(discordWebhook, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(message),
     });
 
-    if (!discordRes.ok) {
-      const errorText = await discordRes.text();
+    if (!discordResponse.ok) {
+      const errorText = await discordResponse.text();
       throw new Error(`Discord error: ${errorText}`);
     }
 
